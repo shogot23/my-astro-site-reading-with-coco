@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { genreLabel, normalizeGenreSlug } from '../../lib/genres';
+
+const books = await getCollection('books');
+const photos = await getCollection('photos');
+const genreSet = new Set([...books.map((b) => b.data.genre), ...photos.map((p) => p.data.genre)]);
+
+export async function getStaticPaths() {
+  const books = await getCollection('books');
+  const photos = await getCollection('photos');
+  const genreSet = new Set([...books.map((b) => b.data.genre), ...photos.map((p) => p.data.genre)]);
+  return [...genreSet].map((genre) => ({ params: { genre } }));
+}
+
+const genre = normalizeGenreSlug(Astro.params.genre ?? '');
+const filteredBooks = books.filter((book) => book.data.genre === genre);
+const filteredPhotos = photos.filter((photo) => photo.data.genre === genre);
+---
+
+<BaseLayout title={`${genreLabel(genre)} | ジャンル別`}>
+  <h1>ジャンル: {genreLabel(genre)}</h1>
+  {!genreSet.has(genre) && <p>このジャンルのデータはありません。</p>}
+
+  <section style="margin-top:2rem;">
+    <h2>本</h2>
+    <div class="grid cards-3">
+      {filteredBooks.map((book) => (
+        <a class="card" href={`/books/${book.slug}`}>
+          <img class="thumb" src={book.data.coverImage} alt={book.data.title} />
+          <div class="card-body">
+            <h3>{book.data.title}</h3>
+            <p>{book.data.summary}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section style="margin-top:2rem;">
+    <h2>写真</h2>
+    <div class="grid cards-3">
+      {filteredPhotos.map((photo) => (
+        <article class="card">
+          <img class="thumb" src={photo.data.image} alt={photo.data.title} />
+          <div class="card-body">
+            <h3>{photo.data.title}</h3>
+            {photo.data.notes && <p>{photo.data.notes}</p>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

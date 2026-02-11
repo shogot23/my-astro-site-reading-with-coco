@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { genreLabel, genreMap } from '../../lib/genres';
+import { formatDate } from '../../lib/date';
+
+const books = (await getCollection('books')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+---
+
+<BaseLayout title="本一覧 | 読書ログ with Coco">
+  <h1>本一覧</h1>
+  <div class="controls">
+    <select id="genreFilter">
+      <option value="">すべてのジャンル</option>
+      {Object.entries(genreMap).map(([slug, label]) => <option value={slug}>{label}</option>)}
+    </select>
+    <input id="searchInput" type="search" placeholder="タイトル・著者を検索" />
+  </div>
+
+  <div class="grid cards-3" id="bookGrid">
+    {books.map((book) => (
+      <a class="card book-card" href={`/books/${book.slug}`} data-genre={book.data.genre} data-search={`${book.data.title} ${book.data.author ?? ''}`.toLowerCase()}>
+        <img class="thumb" src={book.data.coverImage} alt={book.data.title} />
+        <div class="card-body">
+          <span class="pill">{genreLabel(book.data.genre)}</span>
+          <h3>{book.data.title}</h3>
+          <p class="meta">{book.data.author ?? '著者不明'} / {formatDate(book.data.pubDate)}</p>
+          <p>{book.data.summary}</p>
+        </div>
+      </a>
+    ))}
+  </div>
+
+  <script>
+    const genreFilter = document.querySelector('#genreFilter');
+    const searchInput = document.querySelector('#searchInput');
+    const cards = [...document.querySelectorAll('.book-card')];
+
+    const applyFilters = () => {
+      const genre = genreFilter.value;
+      const keyword = searchInput.value.trim().toLowerCase();
+      cards.forEach((card) => {
+        const matchedGenre = !genre || card.dataset.genre === genre;
+        const matchedKeyword = !keyword || card.dataset.search.includes(keyword);
+        card.style.display = matchedGenre && matchedKeyword ? '' : 'none';
+      });
+    };
+
+    genreFilter.addEventListener('change', applyFilters);
+    searchInput.addEventListener('input', applyFilters);
+  </script>
+</BaseLayout>
