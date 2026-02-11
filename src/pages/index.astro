@@ -1,13 +1,63 @@
 ---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TopIntro from '../components/TopIntro.astro';
+import ProfileCard from '../components/ProfileCard.astro';
+import { formatDate } from '../lib/date';
+import { genreLabel } from '../lib/genres';
+
+const books = (await getCollection('books')).sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()).slice(0, 3);
+const photos = (await getCollection('photos')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).slice(0, 3);
+const videos = (await getCollection('videos')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime()).slice(0, 3);
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>My Astro Site</title>
-  </head>
-  <body>
-    <h1>Hello from Astro!</h1>
-  </body>
-</html>
+<BaseLayout title="読書ログ with Coco">
+  <TopIntro />
+  <ProfileCard />
+
+  <section style="margin-top:2rem;" aria-labelledby="latest-books-title">
+    <h2 id="latest-books-title">最新の本</h2>
+    <div class="grid cards-3">
+      {books.map((book) => (
+        <a class="card" href={`/books/${book.slug}`}>
+          <img class="thumb" src={book.data.coverImage} alt={book.data.title} />
+          <div class="card-body">
+            <span class="pill">{genreLabel(book.data.genre)}</span>
+            <h3>{book.data.title}</h3>
+            <p class="meta">{formatDate(book.data.pubDate)}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section style="margin-top:2.5rem;" aria-labelledby="latest-photos-title">
+    <h2 id="latest-photos-title">最新の写真</h2>
+    <div class="grid cards-3">
+      {photos.map((photo) => (
+        <a class="card" href={`/genres/${photo.data.genre}`}>
+          <img class="thumb" src={photo.data.image} alt={photo.data.title} />
+          <div class="card-body">
+            <h3>{photo.data.title}</h3>
+            <p class="meta">{formatDate(photo.data.date)}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section style="margin-top:2.5rem;" aria-labelledby="latest-videos-title">
+    <h2 id="latest-videos-title">最新の動画</h2>
+    <div class="grid cards-3">
+      {videos.map((video) => (
+        <a class="card" href="/videos">
+          {video.data.thumbnail && <img class="thumb" src={video.data.thumbnail} alt={video.data.title} />}
+          <div class="card-body">
+            <h3>{video.data.title}</h3>
+            <p class="meta">{formatDate(video.data.date)}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

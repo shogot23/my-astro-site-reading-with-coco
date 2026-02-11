@@ -1,0 +1,42 @@
+<section class="hero card" aria-labelledby="site-intro-title">
+  <div class="card-body">
+    <p class="eyebrow">読書・写真・動画の記録サイト</p>
+    <h1 id="site-intro-title">読書ログ with Coco</h1>
+    <p>
+      ココと過ごす読書時間を、本・写真・Sora2動画でまとめたアーカイブです。
+      まずプロフィールを見て、ブログ一覧をたどり、SNSで最新更新をチェックできます。
+    </p>
+    <nav class="quick-links" aria-label="おすすめの回遊リンク">
+      <a href="#profile">プロフィール</a>
+      <a href="/books">ブログ（本一覧）</a>
+      <a href="https://x.com" target="_blank" rel="noopener noreferrer">SNS</a>
+    </nav>
+  </div>
+</section>
+
+<style>
+  .hero { margin-bottom: 2rem; }
+  .eyebrow {
+    margin: 0 0 .4rem;
+    color: var(--muted);
+    font-size: .85rem;
+    letter-spacing: .04em;
+  }
+  .quick-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: 1rem;
+  }
+  .quick-links a {
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: .45rem .8rem;
+    background: #fff;
+    font-size: .9rem;
+  }
+  .quick-links a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+</style>
