@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate } from '../../lib/date';
+
+const videos = (await getCollection('videos')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const books = await getCollection('books');
+---
+
+<BaseLayout title="動画一覧 | 読書ログ with Coco">
+  <h1>動画一覧</h1>
+  <div class="controls">
+    <select id="bookFilter">
+      <option value="">本すべて</option>
+      {books.map((book) => <option value={book.slug}>{book.data.title}</option>)}
+    </select>
+  </div>
+
+  <div class="grid cards-3">
+    {videos.map((video) => (
+      <article class="card video-card" data-book={video.data.bookSlug}>
+        {video.data.thumbnail && <img class="thumb" src={video.data.thumbnail} alt={video.data.title} />}
+        <div class="card-body">
+          <h3>{video.data.title}</h3>
+          <p class="meta">{formatDate(video.data.date)} / {video.data.platform}</p>
+          <p><a href={video.data.url} target="_blank" rel="noopener noreferrer">動画リンクを開く</a></p>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <script>
+    const filter = document.querySelector('#bookFilter');
+    const cards = [...document.querySelectorAll('.video-card')];
+
+    filter.addEventListener('change', () => {
+      cards.forEach((card) => {
+        card.style.display = !filter.value || card.dataset.book === filter.value ? '' : 'none';
+      });
+    });
+  </script>
+</BaseLayout>

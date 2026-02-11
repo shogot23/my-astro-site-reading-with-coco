@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { genreLabel, genreMap } from '../../lib/genres';
+
+const photos = (await getCollection('photos')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const books = await getCollection('books');
+---
+
+<BaseLayout title="写真一覧 | 読書ログ with Coco">
+  <h1>写真一覧</h1>
+  <div class="controls">
+    <select id="genreFilter">
+      <option value="">ジャンルすべて</option>
+      {Object.entries(genreMap).map(([slug, label]) => <option value={slug}>{label}</option>)}
+    </select>
+    <select id="bookFilter">
+      <option value="">本すべて</option>
+      {books.map((book) => <option value={book.slug}>{book.data.title}</option>)}
+    </select>
+  </div>
+
+  <div class="grid cards-3">
+    {photos.map((photo) => (
+      <article class="card photo-card" data-genre={photo.data.genre} data-book={photo.data.bookSlug}>
+        <img class="thumb" src={photo.data.image} alt={photo.data.title} />
+        <div class="card-body">
+          <span class="pill">{genreLabel(photo.data.genre)}</span>
+          <h3>{photo.data.title}</h3>
+          <p class="meta">book: {photo.data.bookSlug}</p>
+          {photo.data.notes && <p>{photo.data.notes}</p>}
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <script>
+    const genreFilter = document.querySelector('#genreFilter');
+    const bookFilter = document.querySelector('#bookFilter');
+    const cards = [...document.querySelectorAll('.photo-card')];
+
+    const applyFilters = () => {
+      cards.forEach((card) => {
+        const matchGenre = !genreFilter.value || card.dataset.genre === genreFilter.value;
+        const matchBook = !bookFilter.value || card.dataset.book === bookFilter.value;
+        card.style.display = matchGenre && matchBook ? '' : 'none';
+      });
+    };
+
+    genreFilter.addEventListener('change', applyFilters);
+    bookFilter.addEventListener('change', applyFilters);
+  </script>
+</BaseLayout>
